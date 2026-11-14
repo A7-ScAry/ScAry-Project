@@ -8,10 +8,19 @@
   const available=()=>window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   const getFlag=key=>{try{return localStorage.getItem(key)==='1';}catch{return false;}};
   const setFlag=(key,value)=>{try{localStorage.setItem(key,value?'1':'0');}catch{}};
+  // The main app keeps its helpers private. Read only the known, same-origin
+  // room index and per-room access keys; don't rely on nonexistent window globals.
+  const roomToken=code=>{
+    if(typeof code!=='string'||!/^[A-HJ-NP-Z2-9]{10}$/.test(code))return null;
+    try{return localStorage.getItem('scary_project_token_'+code);}catch{return null;}
+  };
   const rooms=()=>{
-    try {return (window.indexedRooms?.()||[]).filter(x=>x.code&&['active','pending'].includes(x.status||'active'))
-      .map(x=>({code:x.code,token:window.storeGet?.(window.tokenKey(x.code))})).filter(x=>x.token);}
-    catch{return [];}
+    try{
+      const all=JSON.parse(localStorage.getItem('scary_project_my_rooms_v1')||'[]');
+      if(!Array.isArray(all))return [];
+      return all.filter(x=>x&&x.code&&['active','pending'].includes(x.status||'active'))
+        .map(x=>({code:x.code,token:roomToken(x.code)})).filter(x=>x.token);
+    }catch{return [];}
   };
   let publicKey=null,ready=false,busy=false;
   const status=msg=>{const node=$('pushStatus');if(node)node.textContent=msg;};
@@ -104,7 +113,7 @@
     if(!getFlag(ENABLE_KEY))return;
     try{
       const {sub}=await getSubscription();
-      const token=window.storeGet?.(window.tokenKey(code));
+      const token=roomToken(code);
       if(!sub||!token)return;
       await endpointRequest(code,token,{action:'preferences',endpoint:sub.endpoint,
         muted:getFlag(muteKey(code)),previewEnabled:getFlag(previewKey(code))});
