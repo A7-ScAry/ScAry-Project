@@ -10,8 +10,10 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./dashboard.css">
   <link rel="stylesheet" href="./reference.css">
+  <link rel="manifest" href="./manifest.webmanifest">
   <script src="./demo.js" defer></script>
   <script src="./app.js" defer></script>
+  <script src="./push.js" defer></script>
   <title>ScAry Project — Make space for a conversation</title>
 </head>
 <body>
@@ -28,6 +30,7 @@
       <button type="button" class="header-nav-link" data-scary-go="create"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg><span>Create Room</span></button>
       <button type="button" class="header-nav-link" data-scary-go="about"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg><span>About</span></button>
     </nav>
+    <button id="pushEnableButton" class="push-enable-button" type="button" title="Enable notifications" aria-label="Enable notifications" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="pushEnableText">Enable alerts</span></button>
     <div class="header-right header-tagline" aria-label="A place for conversations, not contacts">
       <span class="header-dot" aria-hidden="true"></span><span>A place for conversations, not contacts</span>
     </div>
@@ -199,6 +202,7 @@
             <div class="info-actions"><button id="shareButton" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#i-link"></use></svg> Copy Link</button><button id="infoSettingsButton" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#i-settings"></use></svg> Room Settings</button></div>
             <button id="copySmall" type="button" class="sr-only">Copy invitation link</button>
           </div>
+          <div class="sidebar-push-options"><h3>Notifications</h3><label><span>Mute this room</span><input id="pushMuteRoom" type="checkbox" disabled></label><label><span>Show message previews <small>Visible on your lock screen</small></span><input id="pushPreviewRoom" type="checkbox" disabled></label><p id="pushStatus" role="status">Enable alerts above to receive notifications.</p></div>
           <div class="sidebar-section members-section"><div class="section-title"><h3>Members (<span id="memberCount">0</span>)</h3><button type="button" id="manageMembersButton">Manage</button></div><div id="membersList" class="members-list"></div><button id="showAllMembersButton" class="show-members" type="button">Show All Members <svg class="ui-icon" aria-hidden="true"><use href="#i-chevron"></use></svg></button></div>
           <div class="sidebar-utilities"><button id="copyAccessKeyButton" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#i-key"></use></svg> Save private access key</button><p>Your key restores this nickname and host permissions on another device. Keep it private.</p></div>
           <div class="sidebar-section host-panel hidden" id="hostPanel"><div class="section-title"><h3>Host Controls</h3></div>
