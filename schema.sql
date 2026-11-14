@@ -31,11 +31,13 @@ CREATE TABLE IF NOT EXISTS messages (
   room_id TEXT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
   guest_id TEXT NOT NULL REFERENCES guests(id),
   client_nonce TEXT NOT NULL,
+  reply_to_id TEXT REFERENCES messages(id) ON DELETE SET NULL,
   body TEXT NOT NULL CHECK(length(body) BETWEEN 1 AND 1200),
   created_at INTEGER NOT NULL,
   UNIQUE(room_id,guest_id,client_nonce)
 );
 CREATE INDEX IF NOT EXISTS messages_room_time_idx ON messages(room_id,created_at,id);
+CREATE INDEX IF NOT EXISTS messages_reply_idx ON messages(room_id,reply_to_id);
 CREATE TABLE IF NOT EXISTS reports (
   id TEXT PRIMARY KEY,
   room_id TEXT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
@@ -50,3 +52,14 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   hits INTEGER NOT NULL,
   resets_at INTEGER NOT NULL
 );
+
+-- Message replies and single-choice reactions (new databases only).
+-- Existing deployed databases MUST use migration_message_interactions.sql instead.
+CREATE TABLE IF NOT EXISTS message_reactions (
+  message_id TEXT NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+  guest_id TEXT NOT NULL REFERENCES guests(id) ON DELETE CASCADE,
+  emoji TEXT NOT NULL CHECK(emoji IN ('👍🏽','😂','😮','😢','😡','😭','🥀')),
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (message_id, guest_id)
+);
+CREATE INDEX IF NOT EXISTS message_reactions_emoji_idx ON message_reactions(message_id, emoji);

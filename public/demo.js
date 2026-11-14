@@ -27,7 +27,7 @@
         : title==='Gaming Squad'?['Rafi','Mira','Ayaan','Mehr'] : ['Nabila','Sana','Mira'];
       const extras=guestNames.filter(x=>x.toLowerCase()!==n.toLowerCase()).map((nickname,i)=>({id:uid(),nickname,status:'active',isHost:false,token:token(),joinedAt:now+i+1}));
       const room={code:c,title,createdAt:now,expiresAt:now+({'1h':3600000,'1d':86400000,'3d':259200000,'7d':604800000,'30d':2592000000,'90d':7776000000}[body.duration]||86400000),
-        password:body.password||'',approvalRequired:!!body.approvalRequired,locked:false,guests:[host,...extras],messages:[],reports:[]};
+        password:body.password||'',approvalRequired:!!body.approvalRequired,locked:false,guests:[host,...extras],messages:[],reactions:[],reports:[]};
       if(title==='University Project'){
         const stamp=Date.now()-24*60*1000;
         const sample=[
@@ -69,6 +69,32 @@
       const unread=me.status==='active'?room.messages.filter(m=>m.createdAt>after&&m.createdAt>=(me.isHost?0:me.joinedAt)&&m.guestId!==me.id).length:0;
       return {room:safeRoom(room),guest:publicGuest(me),unread:Math.min(999,unread)};
     }
+    // Simulated message interactions: reactions are unique per guest and per message.
+    function details(m){
+      const referenced=room.messages.find(x=>x.id===m.replyToId);
+      const visible=referenced&&(me.isHost||referenced.createdAt>=me.joinedAt);
+      const votes=(room.reactions||[]).filter(r=>r.messageId===m.id);
+      const reactions=[];
+      for(const emoji of ['👍🏽','😂','😮','😢','😡','😭','🥀']){
+        const count=votes.filter(v=>v.emoji===emoji).length;
+        if(count)reactions.push({emoji,count});
+      }
+      return {...m,replyBody:visible?referenced.body:null,replyAuthor:visible?referenced.author:null,
+        reactions,myReaction:votes.find(v=>v.guestId===me.id)?.emoji||null};
+    }
+    if(segments[3]==='reactions' && method==='POST'){
+      if(!['👍🏽','😂','😮','😢','😡','😭','🥀'].includes(body.emoji))fail(400,'Choose a supported reaction.');
+      const target=room.messages.find(m=>m.id===body.messageId&&(me.isHost||m.createdAt>=me.joinedAt));
+      if(!target)fail(404,'Message not found in your room history.');
+      room.reactions ||= [];
+      const existing=room.reactions.findIndex(r=>r.messageId===body.messageId&&r.guestId===me.id);
+      const was=existing>=0?room.reactions[existing].emoji:null;
+      if(existing>=0)room.reactions.splice(existing,1);
+      if(was!==body.emoji)room.reactions.push({messageId:body.messageId,guestId:me.id,emoji:body.emoji});
+      save(rooms);
+      const current=details(target);
+      return {messageId:target.id,reactions:current.reactions,myReaction:current.myReaction};
+    }
     if(segments[3]==='messages'){
       if(method==='GET'){
         let data=room.messages.filter(m=>me.isHost||m.createdAt>=me.joinedAt).slice();
@@ -76,14 +102,21 @@
         if(cursor){const [time,id]=cursor.split(':');if(u.searchParams.has('before'))data=data.filter(m=>m.createdAt<Number(time)||(m.createdAt===Number(time)&&m.id<id));
           else data=data.filter(m=>m.createdAt>Number(time)||(m.createdAt===Number(time)&&m.id>id));}
         data.sort((a,b)=>a.createdAt-b.createdAt||a.id.localeCompare(b.id));
-        if(u.searchParams.has('after'))return {messages:data.slice(0,50),hasMore:false,serverNow:Date.now()};
-        return {messages:data.slice(-50),hasMore:data.length>50,serverNow:Date.now()};
+        const refreshIds=(u.searchParams.get('react')||'').split(',').filter(Boolean).slice(0,40);
+        const updates=Object.fromEntries(refreshIds.map(id=>{
+          const message=room.messages.find(m=>m.id===id&&(me.isHost||m.createdAt>=me.joinedAt));
+          const d=message?details(message):null;
+          return [id,{reactions:d?.reactions||[],myReaction:d?.myReaction||null}];
+        }));
+        if(u.searchParams.has('after'))return {messages:data.slice(0,50).map(details),hasMore:false,reactionUpdates:updates,serverNow:Date.now()};
+        return {messages:data.slice(-50).map(details),hasMore:data.length>50,reactionUpdates:updates,serverNow:Date.now()};
       }
       if(method==='POST'){
         if(!String(body.body||'').trim())fail(400,'Write a message.');
+        if(body.replyToId && !room.messages.some(m=>m.id===body.replyToId&&(me.isHost||m.createdAt>=me.joinedAt)))fail(404,'The replied-to message is unavailable in your room history.');
         let saved=room.messages.find(m=>m.nonce===body.nonce&&m.guestId===me.id);
-        if(!saved){saved={id:uid(),guestId:me.id,author:me.nickname,body:body.body,createdAt:Date.now(),nonce:body.nonce};room.messages.push(saved);save(rooms);}
-        return {message:saved};
+        if(!saved){saved={id:uid(),guestId:me.id,author:me.nickname,body:body.body,replyToId:body.replyToId||null,createdAt:Date.now(),nonce:body.nonce};room.messages.push(saved);save(rooms);}
+        return {message:details(saved)};
       }
     }
     if(segments[3]==='members' && method==='GET')return {members:room.guests.filter(g=>g.status==='active'||(me.isHost&&g.status==='pending')).map(publicGuest),locked:room.locked,approvalRequired:room.approvalRequired};
