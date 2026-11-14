@@ -166,3 +166,60 @@ This version matches the approved dark charcoal / bright teal UI direction, incl
 **Important honesty about the preview:** The sample **project_dataset.xlsx** attachment rendered in the demonstration is a visual sample from the reference screenshot. The real Cloudflare application is **text-only** and does **not** upload, store, or download file attachments. Clicking the preview file explains this. The add (+) button likewise explains the text-only restriction. All existing messaging, room controls and durations remain functional.
 
 The bundled preview automatically opens a **simulated University Project room** with sample members and conversations so you can compare the look without deploying anything. Click **Create Room**, **My Rooms**, or **Home** to try other screens. None of the demo users or messages exist on your deployed server.
+
+
+## Optional Web Push notifications (new messages and direct replies)
+
+This feature is staged separately from the deployed site until you configure its Cloudflare secrets and D1 tables.
+
+### Upgrade your EXISTING ScAry Project database safely
+
+**Do not rerun `schema.sql` on your live database. Do not use `scary-net-db`.**
+
+1. Open your existing **ScAry Project** folder in VS Code and back up the live database:
+
+   ```bash
+   npx wrangler d1 export scary-project-db --remote --output="$HOME/Desktop/ScAry-Project-before-notifications.sql"
+   ```
+
+   Confirm the successful download. **Do not add this backup to public GitHub.**
+
+2. Run the separate notification migration **once**:
+
+   ```bash
+   npx wrangler d1 execute scary-project-db --remote --file=./migration_notifications.sql
+   ```
+
+   This creates only a `push_subscriptions` table and indexes; it does not delete or reset rooms, messages, reactions, or guests.
+
+3. Generate your own VAPID keypair locally (Node.js required):
+
+   ```bash
+   node scripts/generate-vapid.mjs
+   ```
+
+   The generator prints a public key and a private key. **Never commit or share the private key.**
+
+4. In **Cloudflare → Workers & Pages → scaryproject → Settings → Variables and Secrets**, set for **Production**:
+
+   - `VAPID_PUBLIC_KEY` — Text variable containing the generated public key.
+   - `VAPID_PRIVATE_KEY` — **Encrypted secret** containing the generated private key.
+   - `VAPID_SUBJECT` — Text variable containing `mailto:you@example.com`, replaced with an address you control.
+
+   Preserve your existing `DB` binding to `scary-project-db`. Never put the key values in GitHub files or screenshots.
+
+5. Merge the notification feature branch into `main` after the database and secrets are ready. Cloudflare's existing GitHub integration should redeploy; if you add secrets after deploying, redeploy to apply them.
+
+6. Open the live site and tap the new **bell → Enable alerts**. The visitor must grant their browser permission. They can then mute individual rooms or enable previews in Room Info.
+
+### Supported devices and limitations
+
+- On **Mac Safari**, allow website notifications when prompted. On **iPhone/iPad**, install the site via Safari **Add to Home Screen** first (iOS/iPadOS 16.4+) and grant permission from the installed web app. Other browsers vary by OS and provider.
+- Notifications require internet, an active subscription, a currently valid room membership, and push-service availability. Timing and delivery are not guaranteed; they are not substitutes for stored chat history.
+- **Private by default:** Notification payloads are encrypted to each browser. Message previews are off unless that browser opts in, and no browser receives the server's VAPID private key.
+- Room muting and preview preferences are per device. Notifications can be turned off from the bell. Stale subscriptions are removed if the push provider reports 404/410.
+- Hosting and push-delivery service quotas can affect high-traffic rooms. Dispatch is limited to 90 recipients per message to bound resource usage.
+- Notifications are tied to a particular browser installation rather than a permanent user account.
+- Run `npm run check` using Node.js 22+ for the existing 65 simulated API checks plus notification cryptography/integration tests.
+
+References: https://developer.apple.com/documentation/usernotifications/sending-web-push-notifications-in-web-apps-and-browsers, https://www.rfc-editor.org/rfc/rfc8291, https://www.rfc-editor.org/rfc/rfc8292.

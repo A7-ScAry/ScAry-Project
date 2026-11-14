@@ -1,5 +1,6 @@
 import { run, reply, fail, payload, getRoom, alive, getGuest, rateLimit } from '../../../../lib/core.js';
 import { validMessageId, MESSAGE_ID, reactionSummaries } from '../../../../lib/interactions.js';
+import { notifyRoomOfMessage } from '../../../../lib/webpush.js';
 
 export const onRequestGet = context => run(context, async () => {
   const db=context.env.DB, room=await getRoom(db,context.params.code);
@@ -61,7 +62,7 @@ export const onRequestPost = context => run(context, async () => {
     if (!target) fail(404,'The replied-to message is unavailable in your room history.');
   }
   const now=Date.now(),id=crypto.randomUUID();
-  await db.batch([
+  const batchResult=await db.batch([
     db.prepare('INSERT OR IGNORE INTO messages(id,room_id,guest_id,client_nonce,reply_to_id,body,created_at) VALUES (?,?,?,?,?,?,?)')
       .bind(id,room.id,guest.id,nonce,replyToId,body,now),
     db.prepare('UPDATE rooms SET updated_at=? WHERE id=? AND updated_at<=?').bind(now,room.id,now)
@@ -72,5 +73,9 @@ export const onRequestPost = context => run(context, async () => {
     LEFT JOIN guests pg ON pg.id=parent.guest_id
     WHERE m.room_id=? AND m.guest_id=? AND m.client_nonce=?`)
     .bind(room.id,guest.id,nonce).first();
+  const inserted=batchResult[0]?.meta?.changes ?? batchResult[0]?.changes ?? 0;
+  if(inserted && typeof context.waitUntil==='function') {
+    context.waitUntil(notifyRoomOfMessage(context,room,guest,{body},replyToId));
+  }
   return reply({message:{...saved,author:guest.nickname,guestId:guest.id,reactions:[],myReaction:null}},201);
 });

@@ -109,7 +109,7 @@ function resetHome(clearURL=true){
   $('roomSidebar').classList.remove('open','settings-open');$('createForm').classList.remove('hidden');$('joinForm').classList.remove('hidden');
   $('waitingPanel').classList.add('hidden');setTab('create');
   if(clearURL){const u=new URL(location.href);u.searchParams.delete('room');u.searchParams.delete('r');history.pushState({},'',u.toString());}
-  renderMyRooms();refreshMyRooms();
+  renderMyRooms();refreshMyRooms();window.ScAryPush?.onRoomExit();
 }
 
 async function visitRoom(code) {
@@ -219,6 +219,7 @@ async function enterRoom(){
     }
   },4500);
   $('messageInput').focus();
+  window.ScAryPush?.onRoomEnter(state.code,state.token);
 }
 async function refreshInfo(){
   const code=state.code,nav=state.navigationId,token=state.token;
@@ -702,6 +703,7 @@ async function recoverRoom(event){
   finally{button.disabled=false;}
 }
 
+window.scaryCurrentRoom=()=>state.code;
 function setupEvents(){
   $('tabCreate').addEventListener('click',()=>setTab('create'));
   $('tabJoin').addEventListener('click',()=>setTab('join'));

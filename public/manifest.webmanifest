@@ -1,0 +1,11 @@
+{
+  "id": "/",
+  "name": "ScAry Project",
+  "short_name": "ScAry Project",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#071820",
+  "theme_color": "#071820",
+  "icons": [{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

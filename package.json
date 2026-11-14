@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Instant temporary guest chat rooms for Cloudflare Pages + D1",
   "scripts": {
-    "check": "node --disable-warning=ExperimentalWarning tests/check.mjs",
+    "check": "node --disable-warning=ExperimentalWarning tests/check.mjs && node --disable-warning=ExperimentalWarning tests/push-check.mjs",
     "dev": "npx wrangler pages dev public",
     "start": "npx wrangler pages dev public"
   }
