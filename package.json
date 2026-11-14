@@ -1,0 +1,12 @@
+{
+  "name": "scary-project",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Instant temporary guest chat rooms for Cloudflare Pages + D1",
+  "scripts": {
+    "check": "node --disable-warning=ExperimentalWarning tests/check.mjs",
+    "dev": "npx wrangler pages dev public",
+    "start": "npx wrangler pages dev public"
+  }
+}

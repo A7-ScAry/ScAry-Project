@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071820">
+  <meta name="description" content="ScAry Project — instant temporary chat rooms. Share a link, choose a nickname, and talk without giving anyone your phone number.">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./dashboard.css">
+  <link rel="stylesheet" href="./reference.css">
+  <script src="./demo.js" defer></script>
+  <script src="./app.js" defer></script>
+  <title>ScAry Project — Make space for a conversation</title>
+</head>
+<body>
+  <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol><symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5.5h14A2.5 2.5 0 0 1 21.5 8v9A2.5 2.5 0 0 1 19 19.5H10l-6 3v-3.5A2.5 2.5 0 0 1 2 16.5V8A2.5 2.5 0 0 1 5 5.5z"/><path d="M7 10h10M7 14h7"/></symbol><symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></symbol><symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></symbol><symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-game" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 7h11A4.5 4.5 0 0 1 22 11.5l-.6 6.1a2.5 2.5 0 0 1-4.1 1.5L14 16H10l-3.3 3.1a2.5 2.5 0 0 1-4.1-1.5L2 11.5A4.5 4.5 0 0 1 6.5 7Z"/><path d="M7 10v5M4.5 12.5h5M16 11h.01M19 13h.01"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 3.1 6.4 7.1 1.1-5.1 5 .9 7-6-3.4-6 3.4.9-7-5.1-5 7.1-1.1z"/></symbol><symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol><symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="5"/><path d="m11.5 11.5 8.5-8.5 2 2-2.5 2.5 1.5 1.5-3 3-1.5-1.5-3.5 3.5"/></symbol><symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 13.5a5 5 0 0 0 7.2 0l2.3-2.3a5 5 0 0 0-7.1-7.1l-1.4 1.4M13.5 10.5a5 5 0 0 0-7.2 0L4 12.8a5 5 0 0 0 7.1 7.1l1.4-1.4"/></symbol><symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.7" cy="10.7" r="7"/><path d="m16 16 5.5 5.5"/></symbol><symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7.4 20-4.4-8.8L2 8.7Z"/><path d="M22 2 10.2 13.2"/></symbol><symbol id="i-smile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1.5 2 5.5 2 7 0M8.5 9h.01M15.5 9h.01"/></symbol><symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M9.8 2h4.4l.7 2.5 2 1.2 2.5-.6 2.2 3.8-1.8 1.9v2.4l1.8 1.9-2.2 3.8-2.5-.6-2 1.2-.7 2.5H9.8l-.7-2.5-2-1.2-2.5.6-2.2-3.8 1.8-1.9v-2.4L2.4 8.9l2.2-3.8 2.5.6 2-1.2Z"/><circle cx="12" cy="12" r="3.1"/></symbol><symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 5 5-4 2-2.1 5.1 2.1 2.1-2 2-4.2-4.2L3 22l7-7-4-4 2-2 2 2L15 7z"/></symbol><symbol id="i-userplus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="8" r="4"/><path d="M19 9v8M15 13h8"/></symbol><symbol id="i-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol><symbol id="i-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m2 8 5 4 5-7 5 7 5-4-2 11H4z"/><path d="M4 21h16"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3.5 5v7c0 5.6 3.6 8.5 8.5 10 4.9-1.5 8.5-4.4 8.5-10V5Z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol><symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></symbol><symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M15 2v6h5"/></symbol><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M4 18v4h16v-4"/></symbol><symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol><symbol id="i-dots" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12h.01M12 12h.01M17 12h.01"/></symbol><symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol><symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></symbol><symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 1.8 7.5L21 12l-7.2 2.5L12 22l-1.8-7.5L3 12l7.2-2.5z"/></symbol></defs></svg>
+  <div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="./" id="brandLink" aria-label="ScAry Project home">
+      <span class="brand-icon"><svg class="brand-a-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="currentColor" d="M31 7 61 47H49L31 24 21 37H34C38 37 40 40 40 42C40 44 37 47 34 47H3Z"/></svg></span>
+      <span class="brand-name">Sc<span class="brand-accent">A</span>ry <span class="brand-subname">Project</span></span>
+    </a>
+    <nav class="header-navigation" aria-label="Main navigation">
+      <button type="button" class="header-nav-link" data-scary-go="home"><svg class="ui-icon" aria-hidden="true"><use href="#i-home"></use></svg><span>Home</span></button>
+      <button type="button" class="header-nav-link selected" data-scary-go="myrooms"><svg class="ui-icon" aria-hidden="true"><use href="#i-chat"></use></svg><span>My Rooms</span></button>
+      <button type="button" class="header-nav-link" data-scary-go="create"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg><span>Create Room</span></button>
+      <button type="button" class="header-nav-link" data-scary-go="about"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg><span>About</span></button>
+    </nav>
+    <div class="header-right header-tagline" aria-label="A place for conversations, not contacts">
+      <span class="header-dot" aria-hidden="true"></span><span>A place for conversations, not contacts</span>
+    </div>
+  </header>
+  <main>
+    <section class="home-screen" id="homeScreen">
+      <div class="home-workspace">
+        <nav class="home-navigation" aria-label="Workspace navigation">
+          <div class="rail-section-title">WORKSPACE</div>
+          <button type="button" class="rail-link selected" data-scary-go="home"><span class="rail-icon">⌂</span> Home</button>
+          <button type="button" class="rail-link" data-scary-go="myrooms"><span class="rail-icon">▤</span> My Rooms</button>
+          <button type="button" class="rail-link" data-scary-go="create"><span class="rail-icon">＋</span> Create Room</button>
+          <button type="button" class="rail-link" data-scary-go="join"><span class="rail-icon">↗</span> Join a Room</button>
+          <button type="button" class="rail-link" data-scary-go="recover"><span class="rail-icon">⌑</span> Recover Access</button>
+          <div class="home-rail-note"><span class="rail-note-icon">✳</span><strong>No contacts needed.</strong><p>One link, one room, a place to talk.</p></div>
+        </nav>
+        <div class="home-workspace-main">
+          <div class="workspace-kicker"><span class="status-spark"></span> WELCOME TO YOUR SPACE <span> / PRIVATE BY DESIGN</span></div>
+      <div class="home-layout">
+        <div class="hero">
+          <div class="eyebrow"><span class="eyebrow-line"></span> YOUR SPACE. YOUR PEOPLE. YOUR RULES.</div>
+          <h1>Some conversations<br>don't need <em>a contact.</em></h1>
+          <p class="hero-description">Start a room in seconds. Share one link. Talk using nicknames. No account, no phone number, no awkward friend requests.</p>
+          <div class="hero-features">
+            <div class="feature"><div class="feature-icon">↗</div><div><strong>One link to join</strong><span>Invite anyone in a tap</span></div></div>
+            <div class="feature"><div class="feature-icon">◎</div><div><strong>Stay on your terms</strong><span>No personal contacts needed</span></div></div>
+            <div class="feature"><div class="feature-icon">⌁</div><div><strong>Here for a while</strong><span>Rooms expire when you choose</span></div></div>
+          </div>
+          <div class="hero-bottom"><span class="live-orb"></span> TEXT ONLY <span class="middot">·</span> MADE FOR QUICK CONNECTIONS</div>
+        </div>
+        <section class="gateway" aria-label="Room creation and joining">
+          <div class="card-topline"><span>YOUR NEXT CONVERSATION</span><span>01 / 02</span></div>
+          <div class="gateway-header"><div class="gateway-logo">✳</div><h2>Let's make<br><span>some room.</span></h2><p>Less setup. More conversation.</p></div>
+          <div class="tab-bar" role="tablist" aria-label="Room action">
+            <button id="tabCreate" class="tab active" type="button" role="tab" aria-selected="true">Create a room</button>
+            <button id="tabJoin" class="tab" type="button" role="tab" aria-selected="false">Join a room</button>
+          </div>
+          <form id="createForm" class="gateway-form">
+            <label for="createTitle">ROOM NAME</label>
+            <input id="createTitle" class="field" type="text" minlength="3" maxlength="55" placeholder="e.g. Midnight study club" autocomplete="off" required>
+            <label for="createNickname">YOUR NICKNAME</label>
+            <input id="createNickname" class="field" type="text" minlength="2" maxlength="24" placeholder="What should we call you?" autocomplete="nickname" required>
+            <div class="form-heading"><label>ROOM DURATION</label><span>Auto-expires</span></div>
+            <div class="duration-options" role="group" aria-label="Room duration">
+              <label><input type="radio" name="duration" value="1h"><span>1 hour</span></label>
+              <label><input type="radio" name="duration" value="1d" checked><span>24 hours</span></label>
+              <label><input type="radio" name="duration" value="3d"><span>3 days</span></label>
+              <label><input type="radio" name="duration" value="7d"><span>7 days</span></label>
+              <label><input type="radio" name="duration" value="30d"><span>30 days</span></label>
+              <label><input type="radio" name="duration" value="90d"><span>90 days</span></label>
+            </div>
+            <details class="advanced"><summary><span>⊕</span> Privacy options <span class="advanced-note">OPTIONAL</span></summary>
+              <label for="createPassword">ROOM PASSWORD</label><input id="createPassword" class="field" type="password" minlength="6" maxlength="64" placeholder="Optional, 6+ characters" autocomplete="new-password">
+              <label class="check-row"><input id="approvalRequired" type="checkbox"><span>Approve people before they can join</span></label>
+            </details>
+            <button id="createButton" class="big-button" type="submit">Create my room <span>↗</span></button>
+            <p id="createError" class="form-error" role="alert"></p>
+          </form>
+          <form id="joinForm" class="gateway-form hidden">
+            <label for="joinCode">ROOM LINK OR CODE</label><input id="joinCode" class="field" placeholder="Paste an invitation link or code" required autocapitalize="characters" spellcheck="false">
+            <div id="joinRoomHint" class="join-room-hint hidden"></div>
+            <label for="joinNickname">YOUR NICKNAME</label><input id="joinNickname" class="field" minlength="2" maxlength="24" placeholder="Pick a name for this room" required autocomplete="nickname">
+            <div id="joinPasswordRow" class="hidden"><label for="joinPassword">ROOM PASSWORD</label><input id="joinPassword" class="field" type="password" placeholder="Required for private rooms"></div>
+            <button id="joinButton" class="big-button" type="submit">Enter the room <span>↗</span></button>
+            <button id="openJoinRecovery" type="button" class="access-link">Have a saved room access key?</button>
+            <p id="joinError" class="form-error" role="alert"></p>
+          </form>
+          <details id="recoverDetails" class="recovery-details hidden">
+            <summary>Restore access to a previous room</summary>
+            <form id="recoverForm" class="gateway-form">
+              <label for="recoverCode">ROOM LINK OR CODE</label>
+              <input id="recoverCode" class="field" type="text" placeholder="Room code or invitation link" autocomplete="off" required>
+              <label for="recoverToken">YOUR SECRET ACCESS KEY</label>
+              <input id="recoverToken" class="field" type="password" minlength="64" maxlength="64" placeholder="64-character private access key" autocapitalize="none" spellcheck="false" autocomplete="off" required>
+              <p class="recover-hint">This key restores the same nickname and host permissions. Never share it with other people.</p>
+              <button id="recoverButton" type="submit" class="big-button">Restore my room <span>↗</span></button>
+              <p id="recoverError" role="alert" class="form-error"></p>
+            </form>
+          </details>
+          <div id="waitingPanel" class="waiting-panel hidden"><div class="waiting-icon">◷</div><h3>You're on the guest list.</h3><p>Waiting for the host to let you in. This page checks automatically.</p><button id="waitingBack" class="subtle-button" type="button">Return home</button></div>
+          <div class="card-foot"><span class="tiny-lock">⌑</span> No signup · No phone number · No installation</div>
+        </section>
+      </div>
+      <section class="myrooms-section" id="myRoomsSection" aria-label="Your saved rooms">
+        <div class="myrooms-head">
+          <div><div class="eyebrow myrooms-eyebrow"><span class="eyebrow-line"></span> YOUR ROOM INBOX</div><h2>My <em>Rooms.</em></h2><p>Switch between conversations. Your active rooms stay here on this device — even when you close the website.</p></div>
+          <div class="myrooms-head-actions"><span id="myRoomsCount">0 active</span><button id="refreshMyRoomsButton" class="subtle-button" type="button">↻ Refresh</button></div>
+        </div>
+        <div id="myRoomsEmpty" class="myrooms-empty"><strong>No rooms saved yet.</strong><p>Create your first room or join one using an invitation link. It will appear here automatically.</p></div>
+        <div id="myRoomsList" class="myrooms-list" aria-live="polite"></div>
+        <p class="myrooms-footnote">Room lists, unread counts and access keys are saved in this browser. Clear site data or change devices and you may need your private access key to restore access.</p>
+      </section>
+      <div class="bottom-strip"><span>BUILT FOR STUDY GROUPS, GAMING SQUADS & POP-UP CONVERSATIONS.</span><span>NO APP TO DOWNLOAD <span class="arrow-trail">↗</span></span></div>
+        </div><!-- /home-workspace-main -->
+      </div><!-- /home-workspace -->
+    </section>
+
+    <section id="roomScreen" class="room-screen hidden" aria-label="Room conversation">
+      <div class="room-shell">
+        <nav class="room-navigation" aria-label="Room navigation">
+          <button type="button" class="room-new-action" data-scary-go="create"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg><span>Create Room</span></button>
+          <button type="button" class="room-rail-link selected" data-scary-go="myrooms"><svg class="ui-icon" aria-hidden="true"><use href="#i-chat"></use></svg><span>My Rooms</span><span class="rail-count" id="myRoomsNavBadge">0</span></button>
+          <button type="button" class="room-rail-link" data-scary-go="joined"><svg class="ui-icon" aria-hidden="true"><use href="#i-users"></use></svg><span>Joined Rooms</span></button>
+          <button type="button" class="room-rail-link" data-scary-go="starred"><svg class="ui-icon" aria-hidden="true"><use href="#i-star"></use></svg><span>Starred Rooms</span></button>
+          <button type="button" class="room-rail-link" data-scary-go="recover"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"></use></svg><span>Room Recovery</span></button>
+          <div class="room-rail-rule"></div>
+          <div class="quick-actions-heading">Quick Actions</div>
+          <button type="button" class="room-rail-link" data-scary-go="join"><svg class="ui-icon" aria-hidden="true"><use href="#i-link"></use></svg><span>Join by Link</span></button>
+          <button type="button" class="room-rail-link" data-scary-go="recover"><svg class="ui-icon" aria-hidden="true"><use href="#i-key"></use></svg><span>Recover Access</span></button>
+          <div class="room-navigation-footer"><div class="room-nav-mark"><svg class="brand-a-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="currentColor" d="M31 7 61 47H49L31 24 21 37H34C38 37 40 40 40 42C40 44 37 47 34 47H3Z"/></svg></div><strong>Sc<span class="brand-accent">A</span>ry Project</strong><p>No phone number. No app. Just a link and a conversation.</p></div>
+        </nav>
+        <section class="room-inbox" aria-label="My Rooms conversation list">
+          <div class="room-inbox-head"><h2>My Rooms</h2><p>Your active and recent rooms</p></div>
+          <label class="inbox-search-label" for="roomInboxSearch"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg><input id="roomInboxSearch" type="search" autocomplete="off" placeholder="Search rooms..." aria-label="Search your rooms"></label>
+          <div class="inbox-filter-row" role="group" aria-label="Filter rooms">
+            <button class="inbox-filter selected" data-room-filter="all" aria-pressed="true" type="button">All</button>
+            <button class="inbox-filter" data-room-filter="host" aria-pressed="false" type="button">Created</button>
+            <button class="inbox-filter" data-room-filter="joined" aria-pressed="false" type="button">Joined</button>
+          </div>
+          <div id="roomInboxList" class="room-inbox-list" aria-live="polite"></div>
+          <div class="room-inbox-foot">Rooms stay in this browser. Save your private access key to recover them elsewhere.</div>
+        </section>
+        <div class="chat-main">
+          <div class="chat-topbar">
+            <button id="sidebarToggle" type="button" class="icon-button mobile-only" aria-label="Open room info"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></button>
+            <div class="chat-room-avatar"><svg class="ui-icon" aria-hidden="true"><use href="#i-users"></use></svg></div>
+            <div class="chat-meta"><strong id="roomTitleTop">Room name</strong><div class="chat-subtitle"><span id="memberCountTop">0 members</span><span class="chat-separator">•</span><span id="expiryTop">Expires soon</span><span id="connectionIndicator" class="connection-indicator sr-only">Connected</span></div></div>
+            <div class="chat-actions">
+              <button id="starRoomButton" class="chat-icon-button" type="button" aria-label="Star room" title="Star this room"><svg class="ui-icon" aria-hidden="true"><use href="#i-pin"></use></svg></button>
+              <button id="quickInviteButton" class="chat-icon-button" type="button" aria-label="Invite participants" title="Copy invitation link"><svg class="ui-icon" aria-hidden="true"><use href="#i-userplus"></use></svg></button>
+              <button id="openRoomSettings" class="chat-icon-button" type="button" aria-label="Room settings" title="Room settings"><svg class="ui-icon" aria-hidden="true"><use href="#i-settings"></use></svg></button>
+              <details class="chat-more-wrap"><summary class="chat-icon-button" aria-label="More room actions" title="More actions"><svg class="ui-icon" aria-hidden="true"><use href="#i-more"></use></svg></summary><div class="chat-more-menu">
+                <button id="roomHomeButton" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#i-chat"></use></svg> My Rooms</button>
+                <button id="leaveButton" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#i-arrow"></use></svg> Leave room</button>
+                <button id="moreRecoveryButton" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#i-key"></use></svg> Copy recovery key</button>
+              </div></details>
+            </div>
+          </div>
+          <div class="messages-wrap" id="messagesWrap">
+            <button id="olderButton" type="button" class="older-button hidden">Load older messages ↑</button>
+            <div class="timeline-date" id="timelineDate">Today</div>
+            <div id="messagesList" class="messages-list" aria-live="polite"></div>
+          </div>
+          <div class="chat-bottom">
+            <div class="delivery-note"><span id="deliveryStatus">Messages stay inside this room.</span><span id="queuedCount" class="queue-count hidden"></span></div>
+            <form id="messageForm" class="composer">
+              <button id="attachmentButton" type="button" class="composer-utility" title="File attachments are not supported in text-only rooms" aria-label="Attachment information"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button>
+              <label class="sr-only" for="messageInput">Message</label>
+              <div class="composer-field"><textarea id="messageInput" rows="1" maxlength="1200" placeholder="Type a message..." required></textarea><button id="emojiButton" type="button" class="emoji-button" aria-label="Insert an emoji"><svg class="ui-icon" aria-hidden="true"><use href="#i-smile"></use></svg></button></div>
+              <button id="sendButton" type="submit" aria-label="Send message"><svg class="ui-icon" aria-hidden="true"><use href="#i-send"></use></svg></button>
+            </form>
+            <div class="composer-hint">TEXT ONLY · ENTER TO SEND · SHIFT + ENTER FOR A NEW LINE</div>
+          </div>
+        </div>
+        <aside class="room-sidebar" id="roomSidebar" aria-label="Room information">
+          <div class="sidebar-upper">
+            <div class="sidebar-heading"><h2>Room Info</h2><button id="sidebarClose" class="sidebar-close" type="button" aria-label="Close room details"><svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg></button></div>
+            <div class="room-summary"><div class="room-summary-avatar"><svg class="ui-icon" aria-hidden="true"><use href="#i-users"></use></svg></div><div><strong id="roomTitle">Room name</strong><p id="roomDescription">Temporary room conversation</p></div></div>
+            <div class="room-badges"><span class="host-created-badge"><svg class="ui-icon" aria-hidden="true"><use href="#i-crown"></use></svg> Created by you</span><span class="host-role-badge"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"></use></svg> Host</span></div>
+            <dl class="room-facts">
+              <div><dt><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"></use></svg> Expires in</dt><dd id="expirySidebar">--</dd></div>
+              <div><dt># &nbsp; Room ID</dt><dd id="roomCodeLabel">XXXXXXXXXX</dd></div>
+              <div><dt><svg class="ui-icon" aria-hidden="true"><use href="#i-lock"></use></svg> Access</dt><dd id="roomAccessLabel">Invite link</dd></div>
+            </dl>
+            <div class="info-actions"><button id="shareButton" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#i-link"></use></svg> Copy Link</button><button id="infoSettingsButton" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#i-settings"></use></svg> Room Settings</button></div>
+            <button id="copySmall" type="button" class="sr-only">Copy invitation link</button>
+          </div>
+          <div class="sidebar-section members-section"><div class="section-title"><h3>Members (<span id="memberCount">0</span>)</h3><button type="button" id="manageMembersButton">Manage</button></div><div id="membersList" class="members-list"></div><button id="showAllMembersButton" class="show-members" type="button">Show All Members <svg class="ui-icon" aria-hidden="true"><use href="#i-chevron"></use></svg></button></div>
+          <div class="sidebar-utilities"><button id="copyAccessKeyButton" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#i-key"></use></svg> Save private access key</button><p>Your key restores this nickname and host permissions on another device. Keep it private.</p></div>
+          <div class="sidebar-section host-panel hidden" id="hostPanel"><div class="section-title"><h3>Host Controls</h3></div>
+            <label class="switch-option"><span>Lock room <small>Stop new people joining</small></span><input type="checkbox" id="lockToggle"><span class="switch"></span></label>
+            <label class="switch-option"><span>Approval required <small>Review new guests</small></span><input type="checkbox" id="approvalToggle"><span class="switch"></span></label>
+            <button id="reportsButton" type="button" class="outline-action">View reports <span>↗</span></button>
+            <div id="reportsPanel" class="reports-panel hidden"></div>
+            <button id="endRoomButton" type="button" class="danger-action">End this room</button>
+          </div>
+          <div id="sidebarRoomSection" class="sidebar-myrooms hidden"><div id="sidebarRoomList"></div><button id="sidebarHomeButton" type="button">See rooms</button></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <dialog id="aboutDialog" class="about-dialog"><form method="dialog"><button class="about-close" aria-label="Close">×</button></form><div class="about-mark"><svg class="brand-a-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="currentColor" d="M31 7 61 47H49L31 24 21 37H34C38 37 40 40 40 42C40 44 37 47 34 47H3Z"/></svg></div><h2>ScAry Project</h2><p>Create short-lived rooms, share a link, and talk using a nickname. No phone number or installation required.</p><p>Rooms expire automatically. Live messaging needs an internet connection. This text-only version does not support file uploads or end-to-end encryption.</p><button type="button" id="aboutCloseButton" class="big-button">Got it</button></dialog>
+  <div id="demoBanner" class="demo-banner hidden"><strong>DESIGN PREVIEW</strong> — This is a simulated room on your device. Real messaging needs Cloudflare deployment.</div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <footer class="site-footer" id="siteFooter"><span>© ScAry Project — Temporary rooms, meaningful moments.</span><span>Room content isn't end-to-end encrypted. Internet required to exchange messages.</span></footer>
+</body>
+</html>

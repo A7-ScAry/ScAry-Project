@@ -1,0 +1,12 @@
+{
+  "name": "scary-project",
+  "pages_build_output_dir": "./public",
+  "compatibility_date": "2026-11-14",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "scary-project-db",
+      "database_id": "PASTE_YOUR_NEW_SCARY_PROJECT_DATABASE_ID_HERE"
+    }
+  ]
+}
