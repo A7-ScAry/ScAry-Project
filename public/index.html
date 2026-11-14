@@ -173,6 +173,10 @@
           </div>
           <div class="chat-bottom">
             <div class="delivery-note"><span id="deliveryStatus">Messages stay inside this room.</span><span id="queuedCount" class="queue-count hidden"></span></div>
+            <div id="replyPreview" class="reply-preview hidden" role="status" aria-live="polite">
+              <div class="reply-preview-main"><small>Replying to <strong id="replyPreviewAuthor"></strong></small><span id="replyPreviewText"></span></div>
+              <button type="button" id="cancelReply" aria-label="Cancel reply" title="Cancel reply">×</button>
+            </div>
             <form id="messageForm" class="composer">
               <button id="attachmentButton" type="button" class="composer-utility" title="File attachments are not supported in text-only rooms" aria-label="Attachment information"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button>
               <label class="sr-only" for="messageInput">Message</label>

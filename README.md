@@ -2,6 +2,41 @@
 
 **A completely separate project from ScAry Net.** Instant, temporary text-only rooms: share a link, join using nicknames, and chat without accounts, phone numbers, contacts, or an app installation. This is the **ScAry Project reference-dashboard edition**, including My Rooms, recovery keys, and the angular teal A logo.
 
+
+## NEW: reply to a specific message and react with seven emojis
+
+- Every delivered message has **↩ Reply** and **☺ React** controls. On mobile these controls stay visible; on desktop they appear on hover or keyboard focus.
+- Replies contain a compact quotation of the original author's name and text. Click the quotation to jump to the original message if it is loaded.
+- The reply preview above the composer can be cancelled with **×**. Replies in the local offline queue preserve their target and send after the connection returns.
+- React with only **👍🏽 😂 😮 😢 😡 😭 🥀**. One reaction per participant per message; selecting another emoji switches it, and selecting the same emoji again removes it. Reactions are saved in D1 and refresh during room polling.
+- A new participant cannot see, quote or react to messages from before they joined. Reactions require a valid room access key. No extra personal account is introduced.
+
+### CRITICAL: Upgrade an existing, already deployed scaryproject.pages.dev database
+
+**Do not run `schema.sql` again on your live database. Never run these commands against `scary-net-db`.**
+
+1. Get the new project code locally (unzip the updated full ZIP into your **ScAry Project** project directory). Keep your deployed site on its existing version while migrating.
+2. Open your **ScAry Project** folder in VS Code Terminal and back up your LIVE D1 database to your Mac Desktop:
+
+   ```bash
+   npx wrangler d1 export scary-project-db --remote --output="$HOME/Desktop/ScAry-Project-backup.sql"
+   ```
+
+   Confirm that the terminal says it was successfully downloaded. Do **not** upload the backup to public GitHub.
+3. Add the two new database structures by running the **additive migration once**:
+
+   ```bash
+   npx wrangler d1 execute scary-project-db --remote --file=./migration_message_interactions.sql
+   ```
+
+   Confirm that the SQL executed successfully. This adds one nullable `reply_to_id` column and a new `message_reactions` table. It does not delete old rooms, users or messages. **Do not repeat this migration** once it succeeds.
+4. Push/upload the updated source files to your **ScAry-Project** GitHub repository (do not touch ScAry-Net). The Cloudflare Pages Git integration should trigger deployment. Build output must remain `public`, and the D1 binding must still be called `DB`, pointing to `scary-project-db`.
+5. After successful deployment, refresh the website. In a room, use **Reply** under any message or **React** and choose one of the seven emojis. Test with another browser or device to confirm both users see saved replies and reaction counts.
+
+**Sequence matters:** migrate **before** deploying the updated code. New code requires the new column and reaction table, while old code keeps working with the additive schema.
+
+**Preview mode:** `ScAry Project Preview.html` simulates replies and reactions locally. It does not send live messages to other people.
+
 ## First: preview the design without deploying
 
 Open **`ScAry Project Preview.html`** (supplied next to the ZIP and inside the ZIP) in Safari or Chrome on your Mac. It is **an interactive design simulation on your own device**. Create multiple sample rooms, switch between them using **My Rooms**, test unread badges, send sample messages, recover a room using its secret access key, try host options and preview the responsive layout. This preview **cannot invite another real person**. Only the deployed website supports live messages between different devices.
@@ -20,7 +55,7 @@ Open **`ScAry Project Preview.html`** (supplied next to the ZIP and inside the Z
 - Messages have idempotent IDs so a retried message is not duplicated.
 - Responsive on mobile and desktop. No external JavaScript libraries, fonts or tracking scripts.
 - Separate, simulated `?demo=1` mode for design exploration.
-- **38 automated simulated D1/API integration tests** (Node 22+ with SQLite support).
+- **65 automated simulated D1/API integration tests** (Node 22+ with SQLite support).
 
 ## Using the final My Rooms interface
 
@@ -104,7 +139,7 @@ This uses an in-memory SQLite database and simulates Cloudflare D1 requests. It 
 - A username/nickname cannot be re-used within a room (including after its owner leaves).
 - Room messages are limited to **1,200 characters** each. There are no photos, files, audio, video or voice calls.
 - Offline queueing is best-effort while the website is open; this is **not a fully offline-capable standalone app**. The network must return before other people receive the queued messages.
-- This release passed **38 simulated API integration checks** and desktop/mobile preview interaction checks, but it has **not been tested against a real deployed Cloudflare project** or independently security-audited. Run real multi-device, moderation and load tests before advertising a large public launch.
+- This release passed **65 simulated API integration checks** and desktop/mobile preview interaction checks, but it has **not been tested against a real deployed Cloudflare project** or independently security-audited. Run real multi-device, moderation and load tests before advertising a large public launch.
 
 ## Reference docs
 

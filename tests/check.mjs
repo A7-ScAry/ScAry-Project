@@ -6,6 +6,7 @@ import { onRequestGet as getRoom } from '../functions/api/rooms/[code].js';
 import { onRequestGet as getSummary } from '../functions/api/rooms/[code]/summary.js';
 import { onRequestPost as joinRoom } from '../functions/api/rooms/[code]/join.js';
 import { onRequestGet as getMessages, onRequestPost as sendMessage } from '../functions/api/rooms/[code]/messages.js';
+import { onRequestPost as reactMessage } from '../functions/api/rooms/[code]/reactions.js';
 import { onRequestGet as getMembers } from '../functions/api/rooms/[code]/members.js';
 import { onRequestPost as moderate } from '../functions/api/rooms/[code]/moderate.js';
 import { onRequestPost as report, onRequestGet as readReports } from '../functions/api/rooms/[code]/reports.js';
@@ -119,5 +120,69 @@ for(const [duration,expectedMs] of Object.entries({'1h':3600000,'1d':86400000,'3
   const createdAt=Date.now();
   const r=await req(createRoom,'/api/rooms',{method:'POST',body:{title:'Duration '+duration,nickname:'Host',duration}});
   check(r.status===201&&Math.abs((r.room.expiresAt-createdAt)-expectedMs)<10000,'Create '+duration+' room with exact expected lifespan');
+}
+// Reply-to-message and emoji reactions: exercise permissions, toggling, and polling.
+const anchor=(await req(getMessages,ap+'/messages',{code:roomA.code,token:roomA.token})).messages[0];
+check(!!anchor?.id,'Existing room history remains readable after adding interactions');
+const doReact=(token,messageId,emoji,room=roomA.code)=>req(reactMessage,`/api/rooms/${room}/reactions`,{
+  method:'POST',code:room,token,body:{messageId,emoji}
+});
+result=await doReact(roomA.token,anchor.id,'👍🏽');
+check(result.status===200&&result.myReaction==='👍🏽'&&result.reactions[0].count===1,'Host reacts with exactly one supported emoji');
+result=await doReact(joinedA.token,anchor.id,'👍🏽');
+check(result.myReaction==='👍🏽'&&result.reactions[0].count===2,'Two participants can react to the same message');
+result=await doReact(joinedA.token,anchor.id,'😂');
+check(result.myReaction==='😂'&&result.reactions.length===2,'Choosing a new emoji switches the existing reaction');
+result=await doReact(joinedA.token,anchor.id,'😂');
+check(result.myReaction===null&&result.reactions.length===1,'Tapping the same reaction again removes it');
+result=await doReact(roomA.token,anchor.id,'💜');
+check(result.status===400,'Reject reactions outside the seven requested emojis');
+result=await doReact(memberB.token,anchor.id,'👍🏽');
+check(result.status===401,'Keys from unrelated rooms cannot react');
+result=await doReact(roomA.token,crypto.randomUUID(),'👍🏽');
+check(result.status===404,'Cannot react to a nonexistent message');
+const reactionPoll=await req(getMessages,ap+`/messages?after=${encodeURIComponent(anchor.createdAt+':'+anchor.id)}&react=${anchor.id}`,{
+  code:roomA.code,token:roomA.token
+});
+check(reactionPoll.status===200&&reactionPoll.reactionUpdates[anchor.id].myReaction==='👍🏽',
+  'Polling refreshes reactions even without a new message');
+const originalReplies=await req(getMessages,ap+'/messages',{code:roomA.code,token:roomA.token});
+check(originalReplies.messages.every(m=>'replyToId' in m),'Original messages are returned with nullable reply fields');
+const replyNonce=crypto.randomUUID();
+result=await req(sendMessage,ap+'/messages',{method:'POST',code:roomA.code,token:joinedA.token,
+  body:{body:'Reply to your announcement',nonce:replyNonce,replyToId:anchor.id}});
+check(result.status===201&&result.message.replyToId===anchor.id,'Guest replies to a specific message');
+const replyId=result.message.id;
+result=await req(getMessages,ap+'/messages',{code:roomA.code,token:roomA.token});
+const replyItem=result.messages.find(m=>m.id===replyId);
+check(replyItem?.replyBody===anchor.body&&replyItem.replyAuthor===anchor.author,'Replied message displays its author and quoted content');
+result=await req(sendMessage,ap+'/messages',{method:'POST',code:roomA.code,token:joinedA.token,
+  body:{body:'Trying a reply across rooms',nonce:crypto.randomUUID(),replyToId:(await req(sendMessage,bp+'/messages',{
+    method:'POST',code:roomB.code,token:memberB.token,body:{body:'Expired',nonce:crypto.randomUUID()}
+  })).message?.id||crypto.randomUUID()}});
+check(result.status===404,'Reply target must belong to the same room');
+result=await req(sendMessage,ap+'/messages',{method:'POST',code:roomA.code,token:joinedA.token,
+  body:{body:'Repeated reply nonce',nonce:replyNonce,replyToId:anchor.id}});
+check(result.message.id===replyId&&result.message.body==='Reply to your announcement','Retrying a reply does not duplicate it');
+const later=await req(joinRoom,ap+'/join',{method:'POST',code:roomA.code,body:{nickname:'LateVisitor'}});
+check(later.status===201,'Later member can join after old messages were sent');
+result=await doReact(later.token,anchor.id,'🥀');
+check(result.status===404,'Late member cannot react to messages sent before joining');
+result=await req(sendMessage,ap+'/messages',{method:'POST',code:roomA.code,token:later.token,
+  body:{body:'Cannot quote old messages',nonce:crypto.randomUUID(),replyToId:anchor.id}});
+check(result.status===404,'Late member cannot quote messages from before joining');
+await new Promise(r=>setTimeout(r,4));
+result=await req(sendMessage,ap+'/messages',{method:'POST',code:roomA.code,token:roomA.token,
+  body:{body:'New host message linking to old announcement',nonce:crypto.randomUUID(),replyToId:anchor.id}});
+check(result.status===201,'Host can reply to old messages after a new guest joins');
+result=await req(getMessages,ap+'/messages',{code:roomA.code,token:later.token});
+check(result.messages.length>=1 && result.messages.every(m=>m.id!==anchor.id),
+  'Late members cannot read pre-join message history');
+check(result.messages.some(m=>m.body.startsWith('New host message')&&m.replyBody===null&&m.replyAuthor===null),
+  'Quoted text from pre-join history is redacted for late members');
+const allEmojis=['👍🏽','😂','😮','😢','😡','😭','🥀'];
+for (const emoji of allEmojis){
+  result=await doReact(roomA.token,replyId,emoji);
+  check(result.status===200&&result.myReaction===emoji,`Reaction ${emoji} is supported`);
 }
 console.log(`\n${checks} end-to-end simulated API checks passed.`);

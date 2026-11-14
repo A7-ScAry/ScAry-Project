@@ -2,8 +2,10 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const DEMO = location.protocol === 'file:' || new URLSearchParams(location.search).has('demo');
+const REACTION_EMOJIS = ['👍🏽','😂','😮','😢','😡','😭','🥀'];
+const REACTION_NAMES = ['Like','Haha','Wow','Sad','Angry','Cry','Flower'];
 const state = { code:null, room:null, guest:null, token:null, messages:[], members:[], hasMore:false,
-  busy:false, flushing:false, timer:null, pendingTimer:null, lastMemberRefresh:0, lastInfoRefresh:0, navigationId:0, inboxChecking:false, lastInboxRefresh:0, inboxTimer:null };
+  replyTarget:null, reactionPickerFor:null, busy:false, flushing:false, timer:null, pendingTimer:null, lastMemberRefresh:0, lastInfoRefresh:0, navigationId:0, inboxChecking:false, lastInboxRefresh:0, inboxTimer:null };
 let toastTimeout;
 const activeFlushes = new Set();
 const memoryStore = new Map(); // Fallback for browsers that disable storage in file previews.
@@ -102,7 +104,7 @@ function setTab(tab) {
 }
 function stopPolling(){clearInterval(state.timer);clearInterval(state.pendingTimer);state.timer=null;state.pendingTimer=null;}
 function resetHome(clearURL=true){
-  stopPolling(); state.navigationId++; state.code=null;state.room=null;state.guest=null;state.token=null;state.messages=[];state.members=[];
+  stopPolling(); state.navigationId++; state.code=null;state.room=null;state.guest=null;state.token=null;state.messages=[];state.members=[];clearReply();state.reactionPickerFor=null;
   $('homeScreen').classList.remove('hidden');$('roomScreen').classList.add('hidden');$('siteFooter').classList.remove('hidden');
   $('roomSidebar').classList.remove('open','settings-open');$('createForm').classList.remove('hidden');$('joinForm').classList.remove('hidden');
   $('waitingPanel').classList.add('hidden');setTab('create');
@@ -195,6 +197,7 @@ async function enterRoom(){
   $('leaveButton').replaceChildren(appIcon('arrow'),document.createTextNode(state.guest.isHost?' End room':' Leave room'));
   $('lockToggle').checked=!!state.room.locked;$('approvalToggle').checked=!!state.room.approvalRequired;
   state.messages=[];state.hasMore=false;state.lastMemberRefresh=0;state.lastInfoRefresh=0;
+  clearReply();state.reactionPickerFor=null;
   updateExpiry();updateQueue();
   try{await Promise.all([loadMessages(true),loadMembers()]);}catch(error){notify(error.message);}
   const code=state.code, nav=state.navigationId;
@@ -248,13 +251,25 @@ async function loadMessages(initial=false){
   if(!state.code||!state.guest)return;
   const code=state.code,token=state.token,nav=state.navigationId;
   const last=!initial?state.messages.at(-1):null;
-  const url=`/api/rooms/${code}/messages`+(last?'?after='+encodeURIComponent(cursor(last)):'');
+  const refreshIds=!initial?state.messages.slice(-40).map(m=>m.id).filter(Boolean):[];
+  const params=new URLSearchParams();
+  if(last)params.set('after',cursor(last));
+  if(refreshIds.length)params.set('react',refreshIds.join(','));
+  const url=`/api/rooms/${code}/messages`+(params.size?'?'+params:'');
   const data=await api(url,{token});
   if(code!==state.code||nav!==state.navigationId)return;
   if(initial)state.messages=data.messages||[];
   else mergeMessages(data.messages||[]);
+  let reactionsChanged=false;
+  for(const msg of state.messages){
+    const update=data.reactionUpdates?.[msg.id];
+    if(!update)continue;
+    if(JSON.stringify(msg.reactions||[])!==JSON.stringify(update.reactions||[]) || (msg.myReaction||null)!==(update.myReaction||null)){
+      msg.reactions=update.reactions||[];msg.myReaction=update.myReaction||null;reactionsChanged=true;
+    }
+  }
   if(initial){state.hasMore=!!data.hasMore;$('olderButton').classList.toggle('hidden',!state.hasMore);}
-  if(initial||data.messages?.length){renderMessages();if(initial){if(DEMO&&state.room?.title==='University Project')$('messagesWrap').scrollTop=0;else scrollDown(true);}}
+  if(initial||data.messages?.length||reactionsChanged){renderMessages();if(initial){if(DEMO&&state.room?.title==='University Project')$('messagesWrap').scrollTop=0;else scrollDown(true);}}
   if(!document.hidden && !$('roomScreen').classList.contains('hidden')) markRead(code,Math.max(data.serverNow||0,0));
 }
 
@@ -282,12 +297,15 @@ function renderMessages(){
     appendMessage(container,message,message.guestId===state.guest?.id,false);
   }
   for(const queued of getOutbox()){
-    appendMessage(container,{author:state.guest?.nickname||'You',body:queued.body,createdAt:queued.createdAt},true,true);
+    const quoted=state.messages.find(m=>m.id===queued.replyToId);
+    appendMessage(container,{author:state.guest?.nickname||'You',body:queued.body,createdAt:queued.createdAt,
+      replyToId:queued.replyToId||null,replyAuthor:quoted?.author||null,replyBody:quoted?.body||null},true,true);
   }
   if(wasNearBottom && !(DEMO && window.innerWidth>780 && state.room?.title==='University Project' && state.messages.length===5))scrollDown();
 }
 function appendMessage(container,mineData,mine,queued){
   const row=document.createElement('div');row.className='message-row'+(mine?' mine':'')+(queued?' queued':'');
+  if(mineData.id)row.id='message-'+mineData.id;
   if(!mine){
     const avatar=document.createElement('span');avatar.className='message-avatar';
     const n=String(mineData.author||'?');avatar.textContent=n.charAt(0).toUpperCase();
@@ -300,6 +318,15 @@ function appendMessage(container,mineData,mine,queued){
   time.textContent=queued?'Saved locally':new Date(mineData.createdAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
   byline.append(author,time);stack.append(byline);
   const bubble=document.createElement('div');bubble.className='message-body';
+  if(mineData.replyToId){
+    const quote=document.createElement('button');quote.type='button';quote.className='message-quoted';
+    quote.setAttribute('aria-label','Jump to replied message');
+    const who=document.createElement('strong');who.textContent=mineData.replyAuthor||'Earlier message';
+    const excerpt=document.createElement('span');excerpt.textContent=mineData.replyBody ? mineData.replyBody.slice(0,150) : 'Message not available in your history';
+    quote.append(who,excerpt);
+    quote.addEventListener('click',()=>jumpToMessage(mineData.replyToId));
+    bubble.append(quote);
+  }
   // Demo-only artwork: file previews are not an upload or download service.
   if(DEMO && mineData.attachment){
     const file=document.createElement('button');file.className='file-preview-card';file.type='button';
@@ -312,14 +339,76 @@ function appendMessage(container,mineData,mine,queued){
     file.addEventListener('click',()=>notify('Sample file only. This text-only release does not upload or download attachments.'));
     bubble.append(file);
     if(mineData.body)bubble.append(document.createTextNode(mineData.body));
-  }else bubble.textContent=mineData.body;
+  }else bubble.append(document.createTextNode(mineData.body));
   stack.append(bubble);
+  if(!queued && mineData.id){
+    const actions=document.createElement('div');actions.className='message-actions';
+    const replyBtn=document.createElement('button');replyBtn.type='button';replyBtn.className='message-action';
+    replyBtn.textContent='↩ Reply';replyBtn.setAttribute('aria-label',`Reply to ${mine?'your':mineData.author+'’s'} message`);
+    replyBtn.addEventListener('click',()=>startReply(mineData));
+    const reactBtn=document.createElement('button');reactBtn.type='button';reactBtn.className='message-action';
+    reactBtn.textContent='☺ React';reactBtn.setAttribute('aria-expanded',String(state.reactionPickerFor===mineData.id));
+    reactBtn.addEventListener('click',()=>{state.reactionPickerFor=state.reactionPickerFor===mineData.id?null:mineData.id;renderMessages();});
+    actions.append(replyBtn,reactBtn);stack.append(actions);
+    if(state.reactionPickerFor===mineData.id){
+      const picker=document.createElement('div');picker.className='message-reaction-picker';picker.setAttribute('role','group');picker.setAttribute('aria-label','Choose a reaction');
+      for(const [i,emoji] of REACTION_EMOJIS.entries()){
+        const btn=document.createElement('button');btn.type='button';btn.textContent=emoji;btn.title=REACTION_NAMES[i];
+        btn.className='reaction-option'+(mineData.myReaction===emoji?' selected':'');
+        btn.setAttribute('aria-label',REACTION_NAMES[i]+' reaction');
+        btn.addEventListener('click',()=>sendReaction(mineData.id,emoji));picker.append(btn);
+      }
+      stack.append(picker);
+    }
+    if(Array.isArray(mineData.reactions)&&mineData.reactions.length){
+      const bar=document.createElement('div');bar.className='message-reactions';bar.setAttribute('aria-label','Message reactions');
+      for(const reaction of mineData.reactions){
+        const btn=document.createElement('button');btn.type='button';btn.className='message-reaction'+(mineData.myReaction===reaction.emoji?' mine':'');
+        btn.textContent=`${reaction.emoji} ${reaction.count}`;btn.title='React '+reaction.emoji;
+        btn.setAttribute('aria-label',`${reaction.emoji}: ${reaction.count} reactions`);
+        btn.addEventListener('click',()=>sendReaction(mineData.id,reaction.emoji));bar.append(btn);
+      }
+      stack.append(bar);
+    }
+  }
   if(mine){const footer=document.createElement('span');footer.className='message-footer-time';
     footer.textContent=queued?'Saved locally':new Date(mineData.createdAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
     if(!queued){const tick=document.createElement('span');tick.className='tick';tick.textContent=' ✓✓';footer.append(tick);}
     stack.append(footer);
   }
   row.append(stack);container.append(row);
+}
+function jumpToMessage(id){
+  const target=document.getElementById('message-'+id);
+  if(!target){notify('That message is not loaded yet. Try Load older messages.');return;}
+  target.scrollIntoView({behavior:'smooth',block:'center'});
+  target.classList.add('message-highlight');
+  setTimeout(()=>target.classList.remove('message-highlight'),1500);
+}
+function renderReplyPreview(){
+  const preview=$('replyPreview');if(!preview)return;
+  const m=state.replyTarget;
+  preview.classList.toggle('hidden',!m);
+  if(m){$('replyPreviewAuthor').textContent=m.author;$('replyPreviewText').textContent=m.body.slice(0,180);}
+}
+function clearReply(){state.replyTarget=null;renderReplyPreview();}
+function startReply(message){
+  if(!state.code||state.guest?.status!=='active')return;
+  state.replyTarget={id:message.id,author:message.author,body:message.body};
+  state.reactionPickerFor=null;renderReplyPreview();renderMessages();
+  $('messageInput').focus();
+}
+async function sendReaction(messageId,emoji){
+  const code=state.code,token=state.token,nav=state.navigationId;
+  if(!code||!token||!REACTION_EMOJIS.includes(emoji))return;
+  state.reactionPickerFor=null;
+  try{
+    const data=await api(`/api/rooms/${code}/reactions`,{method:'POST',token,body:{messageId,emoji}});
+    if(nav!==state.navigationId||code!==state.code)return;
+    const msg=state.messages.find(x=>x.id===messageId);
+    if(msg){msg.reactions=data.reactions||[];msg.myReaction=data.myReaction||null;}
+    renderMessages();
+  }catch(error){notify('Could not update reaction: '+error.message);renderMessages();}
 }
 function scrollDown(force=false){const w=$('messagesWrap');if(force)w.scrollTop=w.scrollHeight;else requestAnimationFrame(()=>w.scrollTop=w.scrollHeight);}
 function updateQueue(){const n=getOutbox().length;$('queuedCount').textContent=n?`${n} queued on this device`:'';$('queuedCount').classList.toggle('hidden',!n);
@@ -329,7 +418,8 @@ async function sendMessage(event){
   const input=$('messageInput');const text=input.value.trim();if(!text)return;
   if([...text].length>1200){notify('Maximum 1,200 characters per message.');return;}
   const items=getOutbox();if(items.length>=30){notify('Your offline queue is full. Reconnect to send saved messages.');return;}
-  items.push({nonce:makeNonce(),body:text,createdAt:Date.now()});saveOutbox(items);
+  items.push({nonce:makeNonce(),body:text,createdAt:Date.now(),replyToId:state.replyTarget?.id||null});saveOutbox(items);
+  clearReply();
   input.value='';input.style.height='auto';updateQueue();renderMessages();scrollDown(true);
   await flushOutbox();
 }
@@ -341,7 +431,7 @@ async function flushOutbox(){
     while(getOutboxFor(code).length){
       const first=getOutboxFor(code)[0];
       try{
-        await api(`/api/rooms/${code}/messages`,{method:'POST',token,body:{body:first.body,nonce:first.nonce}});
+        await api(`/api/rooms/${code}/messages`,{method:'POST',token,body:{body:first.body,nonce:first.nonce,replyToId:first.replyToId||null}});
         const items=getOutboxFor(code);
         if(items[0]?.nonce===first.nonce){items.shift();saveOutboxFor(code,items);}
         if(code===state.code)updateQueue();
@@ -658,6 +748,7 @@ function setupEvents(){
   $('openJoinRecovery').addEventListener('click',()=>{setTab('join');$('recoverDetails').open=true;});
   $('brandLink').addEventListener('click',event=>{if(state.code){event.preventDefault();resetHome();}});
   $('messageForm').addEventListener('submit',sendMessage);
+  $('cancelReply').addEventListener('click',clearReply);
   $('messageInput').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();$('messageForm').requestSubmit();}});
   $('olderButton').addEventListener('click',olderMessages);
   $('shareButton').addEventListener('click',copyInvite);$('copySmall').addEventListener('click',copyInvite);
